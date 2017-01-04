@@ -6,9 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+
 public class Main {
-    static final int GraphNumber=2;
-    static final int PopulationSize=1000; //种群数量最好为偶数
+    static final int GraphNumber=25;
+    static final int PopulationSize=2000; //种群数量最好为偶数
     static final int generationNumber=5000;
     public static void main(String[] args) {
 
@@ -58,9 +59,9 @@ public class Main {
 
 
         //生成初始图矩阵
-       firstPopulationMatrix=generateFirstPopulaitonMatrix(Graphset,VertexALLNumber);
+        firstPopulationMatrix=generateFirstPopulaitonMatrix(Graphset,VertexALLNumber);
         //System.out.println(Arrays.deepToString(firstPopulationMatrix[0]));
-       // System.out.println(Arrays.deepToString(firstPopulationMatrix[1]));
+        // System.out.println(Arrays.deepToString(firstPopulationMatrix[1]));
 
         //生成初始下三角矩阵编码
         firstPopulation=FullMatrixToLadderMatrix(firstPopulationMatrix,VertexPreNumber,Graphset,VertexALLNumber);
@@ -92,10 +93,15 @@ public class Main {
         keepDiversty(nextGenerationChild,DiversityVisitedPopulationSet,Graphset,VertexALLNumber,VertexPreNumber);
         //System.out.println("mutation after VisitedSet"+Arrays.toString(VisitedNumberSet[0]));
         //System.out.println("mutation after VisitedSet"+Arrays.toString(VisitedNumberSet[1]));
-        nextGenerationChild.get(PopulationSize-1).clear();
-        nextGenerationChild.get(PopulationSize-2).clear();
-        nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
-        nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
+        for(int elitismIndex=0;elitismIndex<ElitismTwoSingle.size();elitismIndex++)
+        {
+            nextGenerationChild.get(PopulationSize-1-elitismIndex).clear();
+            nextGenerationChild.get(PopulationSize-1-elitismIndex).addAll(ElitismTwoSingle.get(elitismIndex));
+        }
+        // nextGenerationChild.get(PopulationSize-1).clear();
+        //nextGenerationChild.get(PopulationSize-2).clear();
+        //nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
+        //nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
         for(int count=1;count<generationNumber;count++)
         {
             //VisitedNumberSet=caculateVistitedNumberSet(firstPopulation,VertexALLNumber,VertexPreNumber);
@@ -113,14 +119,19 @@ public class Main {
             fine_grained_mutation(nextGenerationChild,Graphset,VertexALLNumber,VertexPreNumber,VisitedNumberSet);
             Arrays.fill(DiversityVisitedPopulationSet,false);
             keepDiversty(nextGenerationChild,DiversityVisitedPopulationSet,Graphset,VertexALLNumber,VertexPreNumber);
-            nextGenerationChild.get(PopulationSize-1).clear();
-            nextGenerationChild.get(PopulationSize-2).clear();
-            nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
-            nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
+            for(int elitismIndex=0;elitismIndex<ElitismTwoSingle.size();elitismIndex++)
+            {
+                nextGenerationChild.get(PopulationSize-1-elitismIndex).clear();
+                nextGenerationChild.get(PopulationSize-1-elitismIndex).addAll(ElitismTwoSingle.get(elitismIndex));
+            }
+            // nextGenerationChild.get(PopulationSize-1).clear();
+            //nextGenerationChild.get(PopulationSize-2).clear();
+            //nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
+            //nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
             System.out.println("~~~~~~~~~~~迭代次数 "+count+"min fitness~~~ "+min_fitness);
             System.out.println(nextGenerationChild.get(0));
-            System.out.println(nextGenerationChild.get(1));
-            System.out.println(nextGenerationChild.get(2));
+            System.out.println(nextGenerationChild.get(1997));
+            System.out.println(nextGenerationChild.get(1998));
 
         }
 
@@ -206,7 +217,7 @@ public class Main {
             if(count.size()>DuplicateThreshold)
             {
                 //System.out.println("count.size(): ~~~~~~~~~~~~~"+count.size());
-               int excess=count.size()-DuplicateThreshold;
+                int excess=count.size()-DuplicateThreshold;
                 //对超出的重复个体
                 for(int i=0;i<excess;i++)
                 {
@@ -225,32 +236,36 @@ public class Main {
     }
 
     //取前两最好的个体,将上一代的parent中最好的两个赋予下一代最后的两个,返回这两个
+    //取上一代中最好的top2个体或者top2%的个体,不进行crossOver直接复制到下一代child,但进行变异
     public static List<List<List<Integer>>> Elitism( List<List<List<Integer>>> nextGenerationParent,int fitness[],int VertexAllNumber)
     {
         List<List<List<Integer>>> ElitismTwoSingle=new ArrayList<>();
         int bestfitness=0;
-        int second_best_fitness=0;
+        int second_best_fitness=Integer.MAX_VALUE;
         int bestfitnessIndex=0;
-        int second_best_fitness_Index=0;
+        int second_best_fitness_Index=Integer.MAX_VALUE;
         for(int index=0;index<PopulationSize;index++)
         {
-            if(fitness[index]>bestfitness)
+            if(fitness[index]<bestfitness)
             {
                 second_best_fitness=bestfitness;
                 bestfitness=fitness[index];
                 bestfitnessIndex=index;
                 continue;
             }
-            if(fitness[index]>second_best_fitness)
+            if(fitness[index]<second_best_fitness)
             {
                 second_best_fitness=fitness[index];
                 second_best_fitness_Index=index;
                 continue;
             }
         }
+        for(int i=0;i<PopulationSize/50;i++)
+        {
+            ElitismTwoSingle.add(nextGenerationParent.get(bestfitnessIndex));
+            ElitismTwoSingle.add(nextGenerationParent.get(second_best_fitness_Index));
+        }
 
-        ElitismTwoSingle.add(nextGenerationParent.get(bestfitnessIndex));
-        ElitismTwoSingle.add(nextGenerationParent.get(second_best_fitness_Index));
         return ElitismTwoSingle;
     }
 
@@ -266,11 +281,48 @@ public class Main {
         }
         else if(mutation_pro_threshhold>0.1&&mutation_pro_threshhold<0.12)
         {
-            fine_grained_mutation_split(nextGenerationChild,Graphset,VertexAllNumber,VertexPreNumber,VisitedNumberSet);
+            //fine_grained_mutation_split(nextGenerationChild,Graphset,VertexAllNumber,VertexPreNumber,VisitedNumberSet);
         }
 
         return ;
     }
+
+    //细粒度变异之融合
+    public static void fine_grained_mutation_fusion(List<List<List<Integer>>> nextGenerationChild,int Graphset[][][],
+                                                    int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][]) {
+        int populationIndex;
+        //每次循环内部参数申明
+        int choose_mutation_col, belong_graph, choose_mutation_col_height_all, choose_mutation_col_height, choose_mutation_row;
+        for (populationIndex = 0; populationIndex < PopulationSize; populationIndex++) {
+            List<List<Integer>> tempGenerationChildSingle = nextGenerationChild.get(populationIndex);
+            Random random = new Random();
+            //选中某一列变异
+            choose_mutation_col = random.nextInt(tempGenerationChildSingle.get(GraphNumber - 2).size());
+            while (VisitedNumberSet[populationIndex][choose_mutation_col]) {
+                choose_mutation_col = random.nextInt(tempGenerationChildSingle.get(GraphNumber - 2).size());
+            }
+            belong_graph = belongtoWhichGraph(choose_mutation_col, VertexPreNumber);
+            choose_mutation_col_height_all = GraphNumber - 1 - belong_graph;
+            //变异列从起始行到行高
+            choose_mutation_col_height = random.nextInt(choose_mutation_col_height_all);
+            //实际最终行数
+            choose_mutation_row = belong_graph + choose_mutation_col_height;
+            //  System.out.println("belong_graph"+belong_graph);
+            // System.out.println("choose_mutation_col "+choose_mutation_col);
+            //System.out.println("choose_mutation_row_height"+choose_mutation_col_height);
+            //System.out.println("cchoose_mutation_row" +choose_mutation_row);
+
+            //如果选中的该点不为-1,则分裂
+            if (tempGenerationChildSingle.get(choose_mutation_row).get(choose_mutation_col) != -1) {
+                int swap_col = VertexPreNumber[choose_mutation_row + 1] + tempGenerationChildSingle.get(choose_mutation_row).get(choose_mutation_col);
+                VisitedNumberSet[populationIndex][swap_col] = false;
+                tempGenerationChildSingle.get(choose_mutation_row).set(choose_mutation_col, -1);
+                //  System.out.println("mutation VisitedNumberSet~~~");
+            }
+        }
+    }
+
+
     //细粒度变异之分裂
     public static void fine_grained_mutation_split(List<List<List<Integer>>> nextGenerationChild,int Graphset[][][],
                                                    int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][])
@@ -293,8 +345,8 @@ public class Main {
             choose_mutation_col_height=random.nextInt(choose_mutation_col_height_all);
             //实际最终行数
             choose_mutation_row=belong_graph+choose_mutation_col_height;
-          //  System.out.println("belong_graph"+belong_graph);
-           // System.out.println("choose_mutation_col "+choose_mutation_col);
+            //  System.out.println("belong_graph"+belong_graph);
+            // System.out.println("choose_mutation_col "+choose_mutation_col);
             //System.out.println("choose_mutation_row_height"+choose_mutation_col_height);
             //System.out.println("cchoose_mutation_row" +choose_mutation_row);
 
@@ -304,7 +356,7 @@ public class Main {
                 int swap_col=VertexPreNumber[choose_mutation_row+1]+tempGenerationChildSingle.get(choose_mutation_row).get(choose_mutation_col);
                 VisitedNumberSet[populationIndex][swap_col]=false;
                 tempGenerationChildSingle.get(choose_mutation_row).set(choose_mutation_col,-1);
-              //  System.out.println("mutation VisitedNumberSet~~~");
+                //  System.out.println("mutation VisitedNumberSet~~~");
             }
             /*
             //如果选中的点为-1,则融合该行中剩余节点
@@ -388,7 +440,7 @@ public class Main {
     public static void fine_grained_mutation_exchange(List<List<List<Integer>>> nextGenerationChild,
                                                       int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][])
     {
-            int populationIndex;
+        int populationIndex;
         for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
             List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
@@ -489,7 +541,7 @@ public class Main {
             int middle_up=(GraphNumber-1)/2-1;
             //System.out.print("modify before ");
             //System.out.println(nextGenerationChildSingleLeft);
-           // ModifyNextGenerationChildSingle(nextGenerationChildSingleLeft,middle_up,middle_up+1,VertexPreNumber);
+            // ModifyNextGenerationChildSingle(nextGenerationChildSingleLeft,middle_up,middle_up+1,VertexPreNumber);
             //ModifyNextGenerationChildSingle(nextGenerationChildSingleLeft,middle_up,middle_up+1,VertexPreNumber);
             //System.out.print("modify After ");
             //System.out.println(nextGenerationChildSingleLeft);
@@ -525,13 +577,13 @@ public class Main {
                     {
                         if((nextGenerationChildSingle.get(row).get(col)==-1))
                         {
-                           // System.out.println("swap11`~~~~");
+                            // System.out.println("swap11`~~~~");
                             continue;
                         }
                         else if(nextGenerationChildSingle.get(row).get(col)!=-1)
                         {
                             //System.out.println("swap12`~~~~");
-                             swap_target_col=VertexPreNumber[row+1]+nextGenerationChildSingle.get(row).get(col);
+                            swap_target_col=VertexPreNumber[row+1]+nextGenerationChildSingle.get(row).get(col);
                         }
 
                     }
@@ -544,9 +596,9 @@ public class Main {
                             //修正已访问数组
                             nextGenerationChildSingle.get(row).set(col,-1);
                             VisitedNumberSet[populationIndex][swap_target_col]=true;
-                           // System.out.println("swap21`~~~~");
+                            // System.out.println("swap21`~~~~");
                         }
-                       // System.out.println("swap2`~~~~");
+                        // System.out.println("swap2`~~~~");
                     }
                     //如果中途有不为-1的,则与对应的列完全交换,原列全置为-1,内部执行完以后直接break;
                     else if(swap_target_col>=0)
@@ -873,9 +925,9 @@ public class Main {
         int populationIndex=0;
         for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
-           // System.out.println("population~~~~~~~~~~"+populationIndex);
+            // System.out.println("population~~~~~~~~~~"+populationIndex);
             List<List<Integer>> firstpopulationSingle=generateFirstPopulationSingle(firstPopulationMatrix,VertexPreNumber,Graphset,
-                   VertexAllNumber,populationIndex);
+                    VertexAllNumber,populationIndex);
             firstpopulation.add(firstpopulationSingle);
         }
         return firstpopulation;
@@ -899,36 +951,36 @@ public class Main {
         }
 
         //将全矩阵编码映射成下三角
-       for(col=0;col<firstPopulationMatrix[populationIndex][0].length;col++)
-       {
-           int belong_col=-1;
-           for(row=0;row<GraphNumber;row++)
-           {
-               //已经有了归属列
-               if(belong_col>=0)
-               {
-                   //将全编码矩阵的row映射到半编码矩阵的row-1
-                   //System.out.println("belong_col: "+belong_col);
-                   //System.out.println("set Number: "+firstPopulationMatrix[populationIndex][row][col]);
-                  firstpopulationSingle.get(row-1).set(belong_col,firstPopulationMatrix[populationIndex][row][col]);
-               }
-               //如果没有归属列
-               else if(belong_col==-1)
-               {
-                   if(firstPopulationMatrix[populationIndex][row][col]==-1)
-                   {
-                       continue;
-                   }
-                   //如果不为-1,计算belong_col
-                   else if(firstPopulationMatrix[populationIndex][row][col]>-1)
-                   {
-                       belong_col=VertexPreNumber[row]+firstPopulationMatrix[populationIndex][row][col];
+        for(col=0;col<firstPopulationMatrix[populationIndex][0].length;col++)
+        {
+            int belong_col=-1;
+            for(row=0;row<GraphNumber;row++)
+            {
+                //已经有了归属列
+                if(belong_col>=0)
+                {
+                    //将全编码矩阵的row映射到半编码矩阵的row-1
+                    //System.out.println("belong_col: "+belong_col);
+                    //System.out.println("set Number: "+firstPopulationMatrix[populationIndex][row][col]);
+                    firstpopulationSingle.get(row-1).set(belong_col,firstPopulationMatrix[populationIndex][row][col]);
+                }
+                //如果没有归属列
+                else if(belong_col==-1)
+                {
+                    if(firstPopulationMatrix[populationIndex][row][col]==-1)
+                    {
+                        continue;
+                    }
+                    //如果不为-1,计算belong_col
+                    else if(firstPopulationMatrix[populationIndex][row][col]>-1)
+                    {
+                        belong_col=VertexPreNumber[row]+firstPopulationMatrix[populationIndex][row][col];
 
-                   }
-               }
+                    }
+                }
 
-           }
-       }
+            }
+        }
 
         return firstpopulationSingle;
     }
