@@ -1,22 +1,27 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public class Main {
-    static final int GraphNumber=25;
-    static final int PopulationSize=2000; //种群数量最好为偶数
-    static final int generationNumber=5000;
+    static  int GraphNumber;
+    static  int PopulationSize; //种群数量最好为偶数
+    static  int generationNumber;
+    static  int ElitismNumber;
+    static  int DiversityThreshold;
     public static void main(String[] args) {
+        GraphNumber=Integer.parseInt(args[0]);
+        PopulationSize=Integer.parseInt(args[1]);
+        generationNumber=Integer.parseInt(args[2]);
+        ElitismNumber = PopulationSize/50;
+        DiversityThreshold=PopulationSize/50;
+        String GraphDatafilename=args[3];
 
         int Graphset[][][]=new int[GraphNumber][][];
         int fitness[];
         boolean VisitedNumberSet[][];
-        List<List<List<Integer>>> ElitismTwoSingle;
+
 
         int firstPopulationMatrix[][][];
         int index,col,i,j,populationIndex;
@@ -25,6 +30,7 @@ public class Main {
         List<List<List<Integer>>> firstPopulation;
         List<List<List<Integer>>> nextGenerationParent;
         List<List<List<Integer>>> nextGenerationChild;
+        Queue<Individual> ElitismPQ;
         long min_fitness=Long.MAX_VALUE;
 
 
@@ -42,7 +48,7 @@ public class Main {
 
 
         //生成初始图集合
-        GenerateGraph("testIsomorphismGraphSet_FullCompletedGraph",Graphset);
+        GenerateGraph(GraphDatafilename,Graphset);
 
         for(index=0;index<GraphNumber;index++)
         {
@@ -50,9 +56,9 @@ public class Main {
             // System.out.println("VertextPreNumber"+index+": "+VertexPreNumber[index]);
             VertexALLNumber=VertexALLNumber+Graphset[index].length;
         }
-        System.out.println(VertexALLNumber);
-        System.out.println(VertexPreNumber[0]);
-        System.out.println(VertexPreNumber[1]);
+        //System.out.println(VertexALLNumber);
+       // System.out.println(VertexPreNumber[0]);
+        //System.out.println(VertexPreNumber[1]);
 
 
 
@@ -71,7 +77,9 @@ public class Main {
         //计算适应度和冲突数组
         VisitedNumberSet=caculateVistitedNumberSet(firstPopulation,VertexALLNumber,VertexPreNumber);
         fitness=CaculateFitness(firstPopulation,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
-        ElitismTwoSingle=Elitism(firstPopulation,fitness,VertexALLNumber);
+
+        //精英主义,保留fitness最小的N个个体
+        ElitismPQ=Elitism(firstPopulation,fitness,VertexALLNumber,VisitedNumberSet);
 
         //按照适应度倒数轮盘选择
         nextGenerationParent=Select(fitness,firstPopulation);
@@ -90,23 +98,29 @@ public class Main {
         //System.out.println("mutation befor VisitedSet"+Arrays.toString(VisitedNumberSet[0]));
         //System.out.println("mutation befor VisitedSet"+Arrays.toString(VisitedNumberSet[1]));
         fine_grained_mutation(nextGenerationChild,Graphset,VertexALLNumber,VertexPreNumber,VisitedNumberSet);
-        keepDiversty(nextGenerationChild,DiversityVisitedPopulationSet,Graphset,VertexALLNumber,VertexPreNumber);
+
+        //变异后对全体群体重新计算fitenss(需要先重新计算VisitedNumberSet)
+        VisitedNumberSet=caculateVistitedNumberSet(nextGenerationChild,VertexALLNumber,VertexPreNumber);
+        fitness=CaculateFitness(nextGenerationChild,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
         //System.out.println("mutation after VisitedSet"+Arrays.toString(VisitedNumberSet[0]));
         //System.out.println("mutation after VisitedSet"+Arrays.toString(VisitedNumberSet[1]));
-        for(int elitismIndex=0;elitismIndex<ElitismTwoSingle.size();elitismIndex++)
-        {
-            nextGenerationChild.get(PopulationSize-1-elitismIndex).clear();
-            nextGenerationChild.get(PopulationSize-1-elitismIndex).addAll(ElitismTwoSingle.get(elitismIndex));
-        }
-        // nextGenerationChild.get(PopulationSize-1).clear();
-        //nextGenerationChild.get(PopulationSize-2).clear();
-        //nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
-        //nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
+        //利用精英终于生成的E个个体和原来的N个个体混合,取前N个最优的
+       // System.out.println("精英主义替换开始~~~~~~~~~~~~~~~~~~~");
+        // System.out.println(nextGenerationChild);
+        //System.out.println("精英主义替换前的fitness~");
+        ElitismReplace(nextGenerationChild,ElitismPQ,fitness,VisitedNumberSet,VertexALLNumber);
+        //System.out.println(nextGenerationChild);
+        //System.out.println("精英主义替换完成~~~~~~~~~~~~~~~~~~~");
+
+        keepDiversty(nextGenerationChild,DiversityVisitedPopulationSet,Graphset,VertexALLNumber,VertexPreNumber);
+
         for(int count=1;count<generationNumber;count++)
         {
-            //VisitedNumberSet=caculateVistitedNumberSet(firstPopulation,VertexALLNumber,VertexPreNumber);
+            //每轮补充新个体,变异个体以后要重新计算VisitedNumberSet(冲突数组)
+            VisitedNumberSet=caculateVistitedNumberSet(nextGenerationChild,VertexALLNumber,VertexPreNumber);
             fitness=CaculateFitness(nextGenerationChild,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
-            ElitismTwoSingle=Elitism(nextGenerationChild,fitness,VertexALLNumber);
+            //System.out.println("fitness arrays~"+Arrays.toString(fitness));
+            ElitismPQ=Elitism(nextGenerationChild,fitness,VertexALLNumber,VisitedNumberSet);
             for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
             {
                 if(fitness[populationIndex]<min_fitness)
@@ -117,21 +131,27 @@ public class Main {
             nextGenerationParent=Select(fitness,nextGenerationChild);
             nextGenerationChild=coarse_grained_crossover(nextGenerationParent,VertexPreNumber,VisitedNumberSet,VertexALLNumber);
             fine_grained_mutation(nextGenerationChild,Graphset,VertexALLNumber,VertexPreNumber,VisitedNumberSet);
+            //System.out.println("精英主义替换开始~~~~~~~~~~~~~~~~~~~");
+            //System.out.println(nextGenerationChild);
+            //System.out.println("精英主义替换前的fitness~");
+            VisitedNumberSet=caculateVistitedNumberSet(nextGenerationChild,VertexALLNumber,VertexPreNumber);
+            fitness=CaculateFitness(nextGenerationChild,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
+
+            ElitismReplace(nextGenerationChild,ElitismPQ,fitness,VisitedNumberSet,VertexALLNumber);
+            //System.out.println(nextGenerationChild);
+            //System.out.println("精英主义替换完成~~~~~~~~~~~~~~~~~~~");
+
             Arrays.fill(DiversityVisitedPopulationSet,false);
             keepDiversty(nextGenerationChild,DiversityVisitedPopulationSet,Graphset,VertexALLNumber,VertexPreNumber);
-            for(int elitismIndex=0;elitismIndex<ElitismTwoSingle.size();elitismIndex++)
-            {
-                nextGenerationChild.get(PopulationSize-1-elitismIndex).clear();
-                nextGenerationChild.get(PopulationSize-1-elitismIndex).addAll(ElitismTwoSingle.get(elitismIndex));
-            }
+
             // nextGenerationChild.get(PopulationSize-1).clear();
             //nextGenerationChild.get(PopulationSize-2).clear();
             //nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
             //nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
             System.out.println("~~~~~~~~~~~迭代次数 "+count+"min fitness~~~ "+min_fitness);
             System.out.println(nextGenerationChild.get(0));
-            System.out.println(nextGenerationChild.get(1997));
-            System.out.println(nextGenerationChild.get(1998));
+            System.out.println(nextGenerationChild.get(PopulationSize/2));
+            System.out.println(nextGenerationChild.get(PopulationSize-1));
 
         }
 
@@ -144,15 +164,10 @@ public class Main {
             }
         }
         System.out.println("minfitness~~~~~~~~~~~~~~~~~~"+min_fitness);
-        System.out.println(nextGenerationChild.get(0));
-        System.out.println(nextGenerationChild.get(1));
-        System.out.println(nextGenerationChild.get(2));
-        System.out.println(nextGenerationChild.get(3));
-
-
-
-
-
+       // System.out.println(nextGenerationChild.get(0));
+        //System.out.println(nextGenerationChild.get(1));
+        //System.out.println(nextGenerationChild.get(2));
+        //System.out.println(nextGenerationChild.get(3));
 
     }
 
@@ -186,13 +201,13 @@ public class Main {
         }
         return true;
     }
-    //再每次迭代的末尾更新,确保相似个体总数不超过N个
+    //再每次迭代的末尾更新,确保相似个体总数不超过DiversityThreshold个
 
     public static void keepDiversty(List<List<List<Integer>>> nextGenerationChild,
                                     boolean DiversityVisitedPopulationSet[],int Graphset[][][],int VertexAllNumber,int VertexPreNumber[])
     {
         Random random=new Random();
-        int DuplicateThreshold=PopulationSize/100;
+        //System.out.println("开始保证种群多样性~~~~~~~~~~~");
         int populationIndex=0;
         int populationIndexNext=0;
         for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
@@ -203,6 +218,7 @@ public class Main {
             {
                 continue;
             }
+            //对每个个体如果有重复个体
             for(populationIndexNext=0;populationIndexNext<PopulationSize;populationIndexNext++)
             {
                 if(isSameSingle(nextGenerationChild.get(populationIndex),nextGenerationChild.get(populationIndexNext)))
@@ -214,32 +230,65 @@ public class Main {
             {
                 DiversityVisitedPopulationSet[key]=true;
             }
-            if(count.size()>DuplicateThreshold)
+            if(count.size()>DiversityThreshold)
             {
                 //System.out.println("count.size(): ~~~~~~~~~~~~~"+count.size());
-                int excess=count.size()-DuplicateThreshold;
+                int excess=count.size()-DiversityThreshold;
                 //对超出的重复个体
                 for(int i=0;i<excess;i++)
                 {
-
+                    //从重复队列里面先一个数组出来
                     int pos=random.nextInt(count.size());
                     List<List<Integer>>  newSingle=generateNewSingle(Graphset,VertexAllNumber,VertexPreNumber);
                     while(isExistedInPopulation(newSingle,nextGenerationChild))
                     {
                         newSingle=generateNewSingle(Graphset,VertexAllNumber,VertexPreNumber);
                     }
-                    nextGenerationChild.get(pos).clear();
-                    nextGenerationChild.get(pos).addAll(newSingle);
+                    int replaceSingleNumber=count.get(pos);
+                   // System.out.println("由于重复个体太多而替换的个体的索引pos is ~~"+pos);
+                    nextGenerationChild.get(replaceSingleNumber).clear();
+                    nextGenerationChild.get(replaceSingleNumber).addAll(newSingle);
                 }
             }
         }
+        //System.out.println("结束保证种群多样性~~~~~~~~~~~");
     }
+
+    public static Comparator<Individual> fitnessComparator=new Comparator<Individual>() {
+        @Override
+        public int compare(Individual o1, Individual o2) {
+            return o1.fitness-o2.fitness;
+        }
+    };
 
     //取前两最好的个体,将上一代的parent中最好的两个赋予下一代最后的两个,返回这两个
     //取上一代中最好的top2个体或者top2%的个体,不进行crossOver直接复制到下一代child,但进行变异
-    public static List<List<List<Integer>>> Elitism( List<List<List<Integer>>> nextGenerationParent,int fitness[],int VertexAllNumber)
+    public static Queue<Individual> Elitism( List<List<List<Integer>>> nextGenerationParent,int fitness[],int VertexAllNumber,boolean VisitedNumberSet[][])
     {
-        List<List<List<Integer>>> ElitismTwoSingle=new ArrayList<>();
+       // List<List<List<Integer>>> ElitismSingles=new ArrayList<>();
+
+        Queue<Individual> PopulationPQ=new PriorityQueue<>(PopulationSize,fitnessComparator);
+        Queue<Individual> ElitismPQ=new PriorityQueue<>(ElitismNumber,fitnessComparator);
+
+        //构造优先队列,讲所有的个体放入种群优先队列中,重载比较器
+        for(int index=0;index<PopulationSize;index++)
+        {
+            PopulationPQ.offer(new Individual(nextGenerationParent.get(index),fitness[index],VisitedNumberSet[index]));
+        }
+        //取出topN精英加入精英优先队列
+        for(int index=0;index<ElitismNumber;index++)
+        {
+            //System.out.println("获得当代精英适应度~"+PopulationPQ.peek().fitness);
+            ElitismPQ.add(PopulationPQ.poll());
+           // ElitismSingles.add(ElitismPQ.poll().graphFusionCode);
+
+        }
+        //System.out.println("当代精英种族最精英个体"+ElitismPQ.peek().graphFusionCode);
+        return ElitismPQ;
+
+
+        /*
+
         int bestfitness=0;
         int second_best_fitness=Integer.MAX_VALUE;
         int bestfitnessIndex=0;
@@ -267,27 +316,90 @@ public class Main {
         }
 
         return ElitismTwoSingle;
+        */
     }
 
+
+    //精英主义替换,用选择交叉变异后的N个个体加上选择前的E个精英混合,选择其中靠前的N个个体
+    public static void ElitismReplace(List<List<List<Integer>>> nextGenerationChild,Queue<Individual> ElitismPQ,
+                                      int fitness[],boolean VisitedNumberSet[][],int VertextALLNumber)
+    {
+        Queue<Individual> ElitismAndPopulationPQ=new PriorityQueue<>(PopulationSize+ElitismNumber,fitnessComparator);
+        //将下一代个体全部放入优先队列
+        for(int index=0;index<PopulationSize;index++)
+        {
+            ElitismAndPopulationPQ.offer(new Individual(nextGenerationChild.get(index),fitness[index],VisitedNumberSet[index]));
+        }
+        //将上一代保存的精英全部放入优先队列
+        for(int index=0;index<ElitismNumber;index++)
+        {
+            //System.out.println("查看上一代保存精英"+ElitismPQ.peek().fitness);
+            ElitismAndPopulationPQ.offer(ElitismPQ.poll());
+            //ElitismAndPopulationPQ.remove();
+        }
+        //选择前N个个体进入下一代nextgenerationParents
+        for(int index=0;index<PopulationSize;index++)
+        {
+            nextGenerationChild.get(index).clear();
+            fitness[index]=ElitismAndPopulationPQ.peek().fitness;
+            //复制冲突数组
+            for(int count=0;count<VertextALLNumber;count++)
+            {
+                VisitedNumberSet[index][count]=ElitismAndPopulationPQ.peek().VisitedNumberSetSingle[count];
+            }
+            nextGenerationChild.get(index).addAll(ElitismAndPopulationPQ.poll().graphFusionCode);
+           // System.out.println("精英主义替换的当代种群编码~~~"+nextGenerationChild.get(index));
+            //System.out.println("精英主义替换后的当代种群~~~"+fitness[index]);
+
+        }
+        //System.out.println("精英主义替换后的当代种群编码~~~~"+nextGenerationChild);
+    }
 
     //细粒度变异
     public static  void fine_grained_mutation(List<List<List<Integer>>> nextGenerationChild,int Graphset[][][],
                                               int VertexAllNumber,int VertexPreNumber[], boolean VisitedNumberSet[][])
     {
         double mutation_pro_threshhold=Math.random();
-        if(mutation_pro_threshhold<0.1)
+        int VertexNumberAfterFusion[]=new int[PopulationSize];
+        int populationIndex,col;
+        for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
-            fine_grained_mutation_exchange(nextGenerationChild,VertexAllNumber,VertexPreNumber,VisitedNumberSet);
+            //对每个个体,计算其VisitedNumberSet为True的总数
+            for(col=0;col<VertexAllNumber;col++)
+            {
+                //如果为false,说明该列未被置为冲突,VertextNumber++
+                if(!VisitedNumberSet[populationIndex][col])
+                {
+                    VertexNumberAfterFusion[populationIndex]++;
+                }
+            }
+
         }
-        else if(mutation_pro_threshhold>0.1&&mutation_pro_threshhold<0.12)
+        for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
-            //fine_grained_mutation_split(nextGenerationChild,Graphset,VertexAllNumber,VertexPreNumber,VisitedNumberSet);
+            if(mutation_pro_threshhold<0.15)
+            {
+                double mutation_type_choose=Math.random();
+                if(mutation_type_choose<1.0/VertexNumberAfterFusion[populationIndex])
+                {
+                    fine_grained_mutation_split(nextGenerationChild,Graphset,VertexAllNumber,VertexPreNumber,VisitedNumberSet,populationIndex);
+                }
+                else
+                {
+                    fine_grained_mutation_exchange(nextGenerationChild,VertexAllNumber,VertexPreNumber,VisitedNumberSet,populationIndex);
+
+                }
+            }
+
+
         }
+
 
         return ;
     }
 
     //细粒度变异之融合
+    /*
     public static void fine_grained_mutation_fusion(List<List<List<Integer>>> nextGenerationChild,int Graphset[][][],
                                                     int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][]) {
         int populationIndex;
@@ -321,17 +433,16 @@ public class Main {
             }
         }
     }
+    */
 
 
     //细粒度变异之分裂
     public static void fine_grained_mutation_split(List<List<List<Integer>>> nextGenerationChild,int Graphset[][][],
-                                                   int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][])
+                                                   int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][], int populationIndex)
     {
-        int populationIndex;
+
         //每次循环内部参数申明
         int choose_mutation_col,belong_graph,choose_mutation_col_height_all,choose_mutation_col_height,choose_mutation_row;
-        for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
-        {
             List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
             Random random=new Random();
             choose_mutation_col=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
@@ -434,15 +545,13 @@ public class Main {
                 }
             }*/
 
-        }
+
     }
     //细粒度变异之交换
     public static void fine_grained_mutation_exchange(List<List<List<Integer>>> nextGenerationChild,
-                                                      int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][])
+                                                      int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][],int populationIndex)
     {
-        int populationIndex;
-        for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
-        {
+
             List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
             Random random=new Random();
             int col_swap_left=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
@@ -475,7 +584,7 @@ public class Main {
             tempGenerationChildSingle.get(swap_row).set(col_swap_left,tempGenerationChildSingle.get(swap_row).get(col_swap_right));
             tempGenerationChildSingle.get(swap_row).set(col_swap_right,swaptemp);
 
-        }
+
     }
 
     //粗粒度交叉
@@ -690,7 +799,7 @@ public class Main {
         }
         // System.out.println("wheels: "+Arrays.toString(wheel));
         //按照概率随机选择填充生成PopulationSize个下一代parents
-        System.out.println("last wheel~~~"+wheel[PopulationSize-1]);
+        //System.out.println("last wheel~~~"+wheel[PopulationSize-1]);
         for(int count=0;count<PopulationSize;count++)
         {
             double ParentProb=Math.random();
