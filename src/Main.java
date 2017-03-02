@@ -156,10 +156,14 @@ public class Main {
             //nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
             //nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
             System.out.println("~~~~~~~~~~~迭代次数 "+count+"min fitness~~~ "+min_fitness);
-            w.write(count+" "+min_fitness+"\n");
-            System.out.println(nextGenerationChild.get(0));
-            System.out.println(nextGenerationChild.get(PopulationSize/2));
-            System.out.println(nextGenerationChild.get(PopulationSize-1));
+
+            for(int print_index=0;print_index<nextGenerationChild.get(0).size();print_index++)
+            {
+                System.out.println((nextGenerationChild.get(0).get(print_index)));
+            }
+            //System.out.println(nextGenerationChild.get(0));
+            //System.out.println(nextGenerationChild.get(PopulationSize/2));
+            //System.out.println(nextGenerationChild.get(PopulationSize-1));
 
         }
 
@@ -646,9 +650,9 @@ public class Main {
                 else
                 {
                     //如果对应left的映射编码为-1(左集合内没有该图对应的节点),将该列置为Visited True,将left列编码设为对应
-                    System.out.println("map_left_row: "+map_left_row);
-                    System.out.println("belong_graph"+belong_graph_right);
-                    System.out.println("col_swap_left"+col_swap_left);
+                   // System.out.println("map_left_row: "+map_left_row);
+                    //System.out.println("belong_graph"+belong_graph_right);
+                    //System.out.println("col_swap_left"+col_swap_left);
                     if(tempGenerationChildSingle.get(map_left_row).get(col_swap_left)==-1)
                     {
                         int map_graph_index=col_swap_right-VertexPreNumber[belong_graph_right];
@@ -1121,7 +1125,8 @@ public class Main {
                     }
                 }
             }
-            fitness[populationIndex]=EdgeNumberAfterFusion[populationIndex]*VertexNumberAfterFusion[populationIndex];
+            fitness[populationIndex]=EdgeNumberAfterFusion[populationIndex];
+                    //*VertexNumberAfterFusion[populationIndex];
 
         }
         //System.out.println(Arrays.toString(VertexNumberAfterFusion));
