@@ -17,8 +17,9 @@ public class Main {
         String GraphDatafilename=args[3];
         String fitnessOuptutfilename=args[4];
         Writer w=new FileWriter(fitnessOuptutfilename,true);
-        for(int count=0;count<100;count++)
+        for(int count=0;count<20;count++)
         {
+            System.out.print("count is"+count);
             GeneticAlgo(GraphDatafilename,fitnessOuptutfilename,w);
         }
 
@@ -119,12 +120,11 @@ public class Main {
                 bestIndividualIndex=populationIndex;
             }
         }
-        System.out.println("对于初始化种群的最优个体的index是: "+bestIndividualIndex+" "+min_fitness);
+        //System.out.println("对于初始化种群的最优个体的index是: "+bestIndividualIndex);
         //w.write("初始最优个体点数 "+VertexNumberAfterFusion[bestIndividualIndex]+"\n");
         //w.write("初始最优个体边数 "+EdgeNumberAfterFusion[bestIndividualIndex]+"\n");
         //w.write("初始最优个体"+" "+min_fitness+"\n");
         //初代最优个体fitness
-
         w.write(min_fitness+" ");
         //System.out.println("测试fitness的计算是否正确,包含点和边~~~~~~~~~~~~~~~~~~~~");
         //System.out.println(Arrays.toString(VertexNumberAfterFusion));
@@ -291,9 +291,9 @@ public class Main {
             //nextGenerationChild.get(PopulationSize-2).clear();
             //nextGenerationChild.get(PopulationSize-1).addAll(ElitismTwoSingle.get(0));
             //nextGenerationChild.get(PopulationSize-2).addAll(ElitismTwoSingle.get(1));
-            System.out.println("~~~~~~~~~~~迭代次数 "+count+"min fitness~~~ "+min_fitness);
+            //System.out.println("~~~~~~~~~~~迭代次数 "+count+"min fitness~~~ "+min_fitness);
             //w.write(count+":  "+min_fitness+"\n");
-            System.out.println("best individual"+nextGenerationChild.get(0));
+            // System.out.println("best individual"+nextGenerationChild.get(0));
             /*
             for(int print_index=0;print_index<nextGenerationChild.get(0).size();print_index++)
             {
@@ -310,7 +310,7 @@ public class Main {
         VertexNumberAfterFusion=CaculateVertexNumberAfterFusion(nextGenerationChild,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
         EdgeNumberAfterFusion=CaculateEdgeNumberAfterFusion(nextGenerationChild,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
         fitness=CaculateFitness(nextGenerationChild,VertexALLNumber,Graphset,VertexPreNumber,VisitedNumberSet);
-        min_fitness=Long.MAX_VALUE;
+        //min_fitness=Long.MAX_VALUE;
         for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
             if(fitness[populationIndex]<min_fitness)
@@ -319,14 +319,14 @@ public class Main {
                 bestIndividualIndex=populationIndex;
             }
         }
-        System.out.println("minfitness~~~~~~~~~~~~~~~~~~"+min_fitness);
+        //System.out.println("minfitness~~~~~~~~~~~~~~~~~~"+min_fitness);
 
         //w.write("经过遗传算法优化后的图融合点数"+VertexNumberAfterFusion[bestIndividualIndex]+"\n");
         //w.write("经过遗传算法优化后的图融合边数"+EdgeNumberAfterFusion[bestIndividualIndex]+"\n");
         //w.write("经过遗传算法优化后的最佳个体index: "+bestIndividualIndex+"\n");
         //w.write(generationNumber+" "+min_fitness+"\n");
         //末代最有个体
-        w.write(""+min_fitness);
+        w.write(""+min_fitness+"\n");
         //System.out.println("best individual final"+nextGenerationChild.get(0));
         //System.out.println("best indivdual final"+nextGenerationChild.get(1));
         //System.out.println("best indivdual final"+nextGenerationChild.get(2));
@@ -408,7 +408,7 @@ public class Main {
                         newSingle=generateNewSingle(Graphset,VertexAllNumber,VertexPreNumber);
                     }
                     int replaceSingleNumber=count.get(pos);
-                   // System.out.println("由于重复个体太多而替换的个体的索引pos is ~~"+pos);
+                    // System.out.println("由于重复个体太多而替换的个体的索引pos is ~~"+pos);
                     nextGenerationChild.get(replaceSingleNumber).clear();
                     nextGenerationChild.get(replaceSingleNumber).addAll(newSingle);
                 }
@@ -428,7 +428,7 @@ public class Main {
     //取上一代中最好的top2个体或者top2%的个体,不进行crossOver直接复制到下一代child,但进行变异
     public static Queue<Individual> Elitism( List<List<List<Integer>>> nextGenerationParent,int fitness[],int VertexAllNumber,boolean VisitedNumberSet[][])
     {
-       // List<List<List<Integer>>> ElitismSingles=new ArrayList<>();
+        // List<List<List<Integer>>> ElitismSingles=new ArrayList<>();
 
         Queue<Individual> PopulationPQ=new PriorityQueue<>(PopulationSize,fitnessComparator);
         Queue<Individual> ElitismPQ=new PriorityQueue<>(ElitismNumber,fitnessComparator);
@@ -443,7 +443,7 @@ public class Main {
         {
             //System.out.println("获得当代精英适应度~"+PopulationPQ.peek().fitness);
             ElitismPQ.add(PopulationPQ.poll());
-           // ElitismSingles.add(ElitismPQ.poll().graphFusionCode);
+            // ElitismSingles.add(ElitismPQ.poll().graphFusionCode);
 
         }
         //System.out.println("当代精英种族最精英个体"+ElitismPQ.peek().graphFusionCode);
@@ -511,7 +511,7 @@ public class Main {
                 VisitedNumberSet[index][count]=ElitismAndPopulationPQ.peek().VisitedNumberSetSingle[count];
             }
             nextGenerationChild.get(index).addAll(ElitismAndPopulationPQ.poll().graphFusionCode);
-           // System.out.println("精英主义替换的当代种群编码~~~"+nextGenerationChild.get(index));
+            // System.out.println("精英主义替换的当代种群编码~~~"+nextGenerationChild.get(index));
             //System.out.println("精英主义替换后的当代种群~~~"+fitness[index]);
 
         }
@@ -541,7 +541,7 @@ public class Main {
 
         }
         //System.out.println(nextGenerationChild.get(0));
-       // System.out.println("VertextNumberAfterFusion"+VertexNumberAfterFusion[0]);
+        // System.out.println("VertextNumberAfterFusion"+VertexNumberAfterFusion[0]);
 
         for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
@@ -558,7 +558,7 @@ public class Main {
                     //System.out.println("分裂操作以后");
                     //System.out.println(nextGenerationChild.get(populationIndex));
                     //System.out.println("After mutation"+"发生变异的个体编号是"+populationIndex+"~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-                   // System.out.println(nextGenerationChild.get(1));
+                    // System.out.println(nextGenerationChild.get(1));
 
                 }
                 else
@@ -658,97 +658,97 @@ public class Main {
 
         //每次循环内部参数申明
         int choose_mutation_col,belong_graph,choose_mutation_col_height_all,choose_mutation_col_height,choose_mutation_row;
-            List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
-            Random random=new Random();
+        List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
+        Random random=new Random();
+        choose_mutation_col=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
+        while(VisitedNumberSet[populationIndex][choose_mutation_col])
+        {
             choose_mutation_col=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
-            while(VisitedNumberSet[populationIndex][choose_mutation_col])
+        }
+        belong_graph=belongtoWhichGraph(choose_mutation_col,VertexPreNumber);
+        //choose_mutation_col_height_all=GraphNumber-1-belong_graph;
+        //变异列从起始行到行高
+        //choose_mutation_col_height=random.nextInt(choose_mutation_col_height_all);
+
+        //System.out.println("belong_graph"+belong_graph);
+        //System.out.println("choose_mutation_col "+choose_mutation_col);
+        //System.out.println("choose_mutation_row_height"+choose_mutation_col_height);
+        //System.out.println("cchoose_mutation_row" +choose_mutation_row);
+        int choose_mutation_col_length=caculateFusionCodeColLength(tempGenerationChildSingle,choose_mutation_col,VertexPreNumber);
+
+        //如果选中的列长度(即融合后的集合长度<=1),则该列无法分裂,返回
+        if(choose_mutation_col_length<=1)
+        {
+            //System.out.println("采用分裂方式1,基数为1的集合无法分裂");
+            return;
+        }
+        //选出所有选中列中有有效元素的row
+        List<Integer> valid_code_list=new ArrayList<>();
+
+
+
+        for(int valid_row=belong_graph;valid_row<GraphNumber-1;valid_row++)
+        {
+            if(tempGenerationChildSingle.get(valid_row).get(choose_mutation_col)!=-1)
             {
-                choose_mutation_col=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
+                valid_code_list.add(valid_row);
             }
-            belong_graph=belongtoWhichGraph(choose_mutation_col,VertexPreNumber);
-            //choose_mutation_col_height_all=GraphNumber-1-belong_graph;
-            //变异列从起始行到行高
-            //choose_mutation_col_height=random.nextInt(choose_mutation_col_height_all);
+        }
 
-            //System.out.println("belong_graph"+belong_graph);
-            //System.out.println("choose_mutation_col "+choose_mutation_col);
-            //System.out.println("choose_mutation_row_height"+choose_mutation_col_height);
-            //System.out.println("cchoose_mutation_row" +choose_mutation_row);
-            int choose_mutation_col_length=caculateFusionCodeColLength(tempGenerationChildSingle,choose_mutation_col,VertexPreNumber);
+        //该集合中最后有-1(即该列对应的图列首元素)
+        valid_code_list.add(-1);
 
-            //如果选中的列长度(即融合后的集合长度<=1),则该列无法分裂,返回
-            if(choose_mutation_col_length<=1)
+        //System.out.println(valid_code_list);
+
+
+        //定义选择分裂的那一行的number
+        int choose_mutation_row_index=random.nextInt(valid_code_list.size());
+        int choose_mutation_row_number=valid_code_list.get(choose_mutation_row_index);
+
+        //实际最终行数
+        //choose_mutation_row=belong_graph+choose_mutation_col_height;
+        //如果number=-1,则将该中其他元素全部分离出去
+        if(choose_mutation_row_number==-1)
+        {
+            //System.out.println("采用分裂方式二,保留该列首位元素,将其他列元素迁移到第一个元素所在的列");
+            //System.out.println(tempGenerationChildSingle);
+            //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+            int choose_mutation_row_first=valid_code_list.get(0);
+            int swap_col=VertexPreNumber[choose_mutation_row_first+1]+tempGenerationChildSingle.get(choose_mutation_row_first).get(choose_mutation_col);
+            tempGenerationChildSingle.get(choose_mutation_row_first).set(choose_mutation_col,-1);
+            //将list里面的元素全部取出来与对应的swap_col进行交换
+            for(int index=1;index<=valid_code_list.size()-2;index++)
             {
-                //System.out.println("采用分裂方式1,基数为1的集合无法分裂");
-                return;
+                int choose_mutation_row_second=valid_code_list.get(index);
+                int choose_mutation_split_number=tempGenerationChildSingle.get(choose_mutation_row_second).get(choose_mutation_col);
+                tempGenerationChildSingle.get(choose_mutation_row_second).set(swap_col,choose_mutation_split_number);
+                //将原来列的值置为-1
+                tempGenerationChildSingle.get(choose_mutation_row_second).set(choose_mutation_col,-1);
             }
-           //选出所有选中列中有有效元素的row
-            List<Integer> valid_code_list=new ArrayList<>();
+            VisitedNumberSet[populationIndex][swap_col]=false;
+            //VisitedNumberSet[populationIndex][choose_mutation_col]=true;
+            // System.out.println("分裂方式二以后");
+            //System.out.println(tempGenerationChildSingle);
+            //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
 
+        }
+        //如果number不为-1,则将该列对应的元素分裂出去
+        else
+        {
+            //System.out.println("采用分裂方式三,将该列不为首位的元素分裂出去,即将该元素对应的列置为Visited=false");
+            //System.out.println(tempGenerationChildSingle);
+            //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+            // System.out.println(choose_mutation_row_number+"row_number");
+            //System.out.println(choose_mutation_col+"col");
+            int swap_col=VertexPreNumber[choose_mutation_row_number+1]+tempGenerationChildSingle.get(choose_mutation_row_number).get(choose_mutation_col);
+            VisitedNumberSet[populationIndex][swap_col]=false;
+            tempGenerationChildSingle.get(choose_mutation_row_number).set(choose_mutation_col,-1);
+            //System.out.println("分裂方式三以后~~~~~~~~~~~~~~");
+            //System.out.println(tempGenerationChildSingle);
+            //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+        }
 
-
-            for(int valid_row=belong_graph;valid_row<GraphNumber-1;valid_row++)
-            {
-                if(tempGenerationChildSingle.get(valid_row).get(choose_mutation_col)!=-1)
-                {
-                    valid_code_list.add(valid_row);
-                }
-            }
-
-            //该集合中最后有-1(即该列对应的图列首元素)
-            valid_code_list.add(-1);
-
-            //System.out.println(valid_code_list);
-
-
-           //定义选择分裂的那一行的number
-            int choose_mutation_row_index=random.nextInt(valid_code_list.size());
-            int choose_mutation_row_number=valid_code_list.get(choose_mutation_row_index);
-
-           //实际最终行数
-           //choose_mutation_row=belong_graph+choose_mutation_col_height;
-          //如果number=-1,则将该中其他元素全部分离出去
-            if(choose_mutation_row_number==-1)
-            {
-                //System.out.println("采用分裂方式二,保留该列首位元素,将其他列元素迁移到第一个元素所在的列");
-                //System.out.println(tempGenerationChildSingle);
-                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                int choose_mutation_row_first=valid_code_list.get(0);
-                int swap_col=VertexPreNumber[choose_mutation_row_first+1]+tempGenerationChildSingle.get(choose_mutation_row_first).get(choose_mutation_col);
-                tempGenerationChildSingle.get(choose_mutation_row_first).set(choose_mutation_col,-1);
-                //将list里面的元素全部取出来与对应的swap_col进行交换
-                 for(int index=1;index<=valid_code_list.size()-2;index++)
-                 {
-                     int choose_mutation_row_second=valid_code_list.get(index);
-                     int choose_mutation_split_number=tempGenerationChildSingle.get(choose_mutation_row_second).get(choose_mutation_col);
-                     tempGenerationChildSingle.get(choose_mutation_row_second).set(swap_col,choose_mutation_split_number);
-                     //将原来列的值置为-1
-                     tempGenerationChildSingle.get(choose_mutation_row_second).set(choose_mutation_col,-1);
-                 }
-                VisitedNumberSet[populationIndex][swap_col]=false;
-                //VisitedNumberSet[populationIndex][choose_mutation_col]=true;
-               // System.out.println("分裂方式二以后");
-                //System.out.println(tempGenerationChildSingle);
-                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-
-            }
-            //如果number不为-1,则将该列对应的元素分裂出去
-            else
-            {
-                //System.out.println("采用分裂方式三,将该列不为首位的元素分裂出去,即将该元素对应的列置为Visited=false");
-                //System.out.println(tempGenerationChildSingle);
-                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-               // System.out.println(choose_mutation_row_number+"row_number");
-                //System.out.println(choose_mutation_col+"col");
-                int swap_col=VertexPreNumber[choose_mutation_row_number+1]+tempGenerationChildSingle.get(choose_mutation_row_number).get(choose_mutation_col);
-                VisitedNumberSet[populationIndex][swap_col]=false;
-                tempGenerationChildSingle.get(choose_mutation_row_number).set(choose_mutation_col,-1);
-                //System.out.println("分裂方式三以后~~~~~~~~~~~~~~");
-                //System.out.println(tempGenerationChildSingle);
-                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-            }
-
-            //如果选中的该点不为-1,则分裂
+        //如果选中的该点不为-1,则分裂
         /*
             if(tempGenerationChildSingle.get(choose_mutation_row).get(choose_mutation_col)!=-1)
             {
@@ -766,29 +766,29 @@ public class Main {
                                                       int VertexAllNumber,int VertexPreNumber[],boolean VisitedNumberSet[][],int populationIndex)
     {
 
-            List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
-            Random random=new Random();
-            int col_swap_left=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
-            //确保left列不为冲突列
-            while(VisitedNumberSet[populationIndex][col_swap_left])
-            {
-                col_swap_left=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
-            }
+        List<List<Integer>> tempGenerationChildSingle=nextGenerationChild.get(populationIndex);
+        Random random=new Random();
+        int col_swap_left=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
+        //确保left列不为冲突列
+        while(VisitedNumberSet[populationIndex][col_swap_left])
+        {
+            col_swap_left=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
+        }
 
-            //确保right列不为冲突列
-            int col_swap_right=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
-            while(VisitedNumberSet[populationIndex][col_swap_right]||(col_swap_left==col_swap_right))
-            {
-                col_swap_right=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
-            }
+        //确保right列不为冲突列
+        int col_swap_right=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
+        while(VisitedNumberSet[populationIndex][col_swap_right]||(col_swap_left==col_swap_right))
+        {
+            col_swap_right=random.nextInt(tempGenerationChildSingle.get(GraphNumber-2).size());
+        }
 
-            //如果left>right,left与right交换
-            if(col_swap_left>col_swap_right)
-            {
-                int temp=col_swap_left;
-                col_swap_left=col_swap_right;
-                col_swap_right=temp;
-            }
+        //如果left>right,left与right交换
+        if(col_swap_left>col_swap_right)
+        {
+            int temp=col_swap_left;
+            col_swap_left=col_swap_right;
+            col_swap_right=temp;
+        }
 
 
         //判断右边这一列对应的元素有效编码的长度
@@ -811,203 +811,203 @@ public class Main {
                return ;
            }
            */
-           int belong_graph_left=belongtoWhichGraph(col_swap_left,VertexPreNumber);
-           int belong_graph_right=belongtoWhichGraph(col_swap_right,VertexPreNumber);
-           //如果右边该列对应的集合只有一个节点
-            if(col_swap_right_code_length==1)
+        int belong_graph_left=belongtoWhichGraph(col_swap_left,VertexPreNumber);
+        int belong_graph_right=belongtoWhichGraph(col_swap_right,VertexPreNumber);
+        //如果右边该列对应的集合只有一个节点
+        if(col_swap_right_code_length==1)
+        {
+
+            //对应的left的映射行
+            int map_left_row=belong_graph_right-1;
+            //如果右列和左列属于同一个图(编码同一行),直接对下方编码交换
+            if(belong_graph_left==belong_graph_right)
             {
-
-                //对应的left的映射行
-                int map_left_row=belong_graph_right-1;
-                //如果右列和左列属于同一个图(编码同一行),直接对下方编码交换
-                if(belong_graph_left==belong_graph_right)
+                // System.out.println("变异交换策略方式1,左右列队首位于同一个图,右列只有队首元素,则将左列元素全部交换到右列即可");
+                //System.out.println(tempGenerationChildSingle);
+                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                for(int belong_graph_row_index=belong_graph_left;belong_graph_row_index<GraphNumber-1;belong_graph_row_index++)
                 {
-                   // System.out.println("变异交换策略方式1,左右列队首位于同一个图,右列只有队首元素,则将左列元素全部交换到右列即可");
-                    //System.out.println(tempGenerationChildSingle);
-                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                    for(int belong_graph_row_index=belong_graph_left;belong_graph_row_index<GraphNumber-1;belong_graph_row_index++)
-                    {
-                        int swaptemp=tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_left);
-                        tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_left,tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_right));
-                        tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_right,swaptemp);
-                    }
-                    //System.out.println(tempGenerationChildSingle);
-                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                    //System.out.println("变异方式1结束");
+                    int swaptemp=tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_left);
+                    tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_left,tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_right));
+                    tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_right,swaptemp);
                 }
-                //如果右列和左列不属于同一个图(即左列位于右列的图前方)
-                else
-                {
-
-
-                    //如果对应left的映射编码为-1(左集合内没有该图对应的节点),将该列置为Visited True,将left列编码设为对应
-                   // System.out.println("map_left_row: "+map_left_row);
-                    //System.out.println("belong_graph"+belong_graph_right);
-                    //System.out.println("col_swap_left"+col_swap_left);
-                    if(tempGenerationChildSingle.get(map_left_row).get(col_swap_left)==-1)
-                    {
-                        //System.out.println("变异交换策略方式2,左右列队首没有位于同一个图,右列只有队首元素,左列无对应元素" +
-                        //        "则将右列元素置为true,右列元素来到左列,左列对应元素置为false");
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        int map_graph_index=col_swap_right-VertexPreNumber[belong_graph_right];
-                        tempGenerationChildSingle.get(map_left_row).set(col_swap_left,map_graph_index);
-                        VisitedNumberSet[populationIndex][col_swap_right]=true;
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        //System.out.println("变异方式2结束");
-
-                    }
-                    //如果对应left的映射编码不为-1(左集合内有该图对应的节点),
-                    else
-                    {
-                        //System.out.println("变异交换策略方式3,左右列队首没有位于同一个图,右列只有队首元素,左列有对应元素" +
-                        //"则将右列元素置为true,右列元素来到左列,左列对应元素置为false");
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        ////将左集合的该列置为Visited false,右集合的原列置为Visited True
-                        int map_graph_index_left=VertexPreNumber[belong_graph_right]+tempGenerationChildSingle.get(map_left_row).get(col_swap_left);
-                        int map_graph_index_right=col_swap_right-VertexPreNumber[belong_graph_right];
-                        tempGenerationChildSingle.get(map_left_row).set(col_swap_left,map_graph_index_right);
-                        VisitedNumberSet[populationIndex][col_swap_right]=true;
-                        VisitedNumberSet[populationIndex][map_graph_index_left]=false;
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        //System.out.println("变异方式3结束");
-
-                    }
-                }
-
-
-                return;
+                //System.out.println(tempGenerationChildSingle);
+                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                //System.out.println("变异方式1结束");
             }
-
-
-
-            //如果右边集合的大小|S|>1
-            //对右边的那列选出某一个有效的编码作为交换
-            //int belong_graph=belongtoWhichGraph(col_swap_right,VertexPreNumber);
-            int map_right_head_row=belong_graph_right-1;
-            //选出所有选中右列中有有效元素的row
-            List<Integer> valid_code_list=new ArrayList<>();
-            for(int valid_row=belong_graph_right;valid_row<GraphNumber-1;valid_row++)
-            {
-                if(tempGenerationChildSingle.get(valid_row).get(col_swap_right)!=-1)
-                {
-                    valid_code_list.add(valid_row);
-                }
-            }
-            //该集合中最后有-1(即该列对应的图列首元素)
-            valid_code_list.add(-1);
-
-            //定义选择分裂的那一行的number
-            int choose_mutation_row_index=random.nextInt(valid_code_list.size());
-            int choose_mutation_row_number=valid_code_list.get(choose_mutation_row_index);
-            //如果选中了头部元素
-            if(choose_mutation_row_number==-1)
-            {
-
-                //如果左右列位于同一个图,则交换下方编码
-                if(belong_graph_left==belong_graph_right)
-                {
-                   // System.out.println("变异交换策略方式4,左右列队首位于同一个图,右列长度大于1,选中右列头部" +
-                            //"则将左右列元素互换即可");
-                   // System.out.println(tempGenerationChildSingle);
-                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                    for(int belong_graph_row_index=belong_graph_left;belong_graph_row_index<GraphNumber-1;belong_graph_row_index++)
-                    {
-                        int swaptemp=tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_left);
-                        tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_left,tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_right));
-                        tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_right,swaptemp);
-                    }
-                    //System.out.println(tempGenerationChildSingle);
-                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                    //System.out.println("变异方式4结束");
-                }
-
-                //如果左右列不位于同一个图
-                else
-                {
-
-                    //如果对应left的映射编码为-1
-                    if(tempGenerationChildSingle.get(map_right_head_row).get(col_swap_left)==-1)
-                    {
-                        //System.out.println("变异交换策略方式5,左右列队首没有位于同一个图,右列长度大于1,选中右列头部" +
-                                //"左列没有该图对应元素,则将右列元素移过来,右列其他元素移动到右列第一个元素对应的列");
-                        //将除头部以外的有效code交换到右半部分
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        //取出第一个元素,找到它对应的VisitedNumberset
-                        int choose_mutation_row_first=valid_code_list.get(0);
-                        int swap_col_after_right=VertexPreNumber[choose_mutation_row_first+1]+tempGenerationChildSingle.get(choose_mutation_row_first).get(col_swap_right);
-                        //将第一个元素置为-1
-                        tempGenerationChildSingle.get(choose_mutation_row_first).set(col_swap_right,-1);
-                        //将list里面的元素全部取出来与对应的swap_col进行交换
-                        for(int index=1;index<=valid_code_list.size()-2;index++)
-                        {
-                            int choose_mutation_row_second=valid_code_list.get(index);
-                            int choose_mutation_exchange_number=tempGenerationChildSingle.get(choose_mutation_row_second).get(col_swap_right);
-                            tempGenerationChildSingle.get(choose_mutation_row_second).set(swap_col_after_right,choose_mutation_exchange_number);
-                            //将原来列的值置为-1
-                            tempGenerationChildSingle.get(choose_mutation_row_second).set(col_swap_right,-1);
-                        }
-                        //将right列置为已访问,将right列第一个不为-1的数对应的列置为false未访问
-                        VisitedNumberSet[populationIndex][col_swap_right]=true;
-                        VisitedNumberSet[populationIndex][swap_col_after_right]=false;
-                        //进行交换
-                        tempGenerationChildSingle.get(map_right_head_row).set(col_swap_left,col_swap_right-VertexPreNumber[belong_graph_right]);
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        //System.out.println("变异方式5结束");
-                    }
-                    //如果对应left的映射编码不为-1
-                    else
-                    {
-                        //System.out.println("变异交换策略方式6,左右列队首没有位于同一个图,右列长度大于1,选中右列头部" +
-                                //"左列有该图对应元素,则将右列元素移过来,右列其他元素移动到左列该元素对应的列");
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        int map_left_col=VertexPreNumber[belong_graph_right]+tempGenerationChildSingle.get(belong_graph_right-1).get(col_swap_left);
-                        //如果两边都有有效编码,将右列的有效编码交换到对应的左列映射编码,然后将右列头部填入左列,修改冲突数组
-                        for(int row_index=belong_graph_right;row_index<GraphNumber-1;row_index++)
-                        {
-                            //int swaptemp=tempGenerationChildSingle.get(row_index).get(col_swap_left);
-                            tempGenerationChildSingle.get(row_index).set(map_left_col,tempGenerationChildSingle.get(row_index).get(col_swap_right));
-                            tempGenerationChildSingle.get(row_index).set(col_swap_right,-1);
-                            //tempGenerationChildSingle.get(row_index).set(col_swap_right,swaptemp);
-                        }
-                        //最后将右列的队首元素值填入左列对应行
-                        tempGenerationChildSingle.get(map_right_head_row).set(col_swap_left,col_swap_right-VertexPreNumber[belong_graph_right]);
-                        VisitedNumberSet[populationIndex][col_swap_right]=true;
-                        VisitedNumberSet[populationIndex][map_left_col]=false;
-                        //System.out.println(tempGenerationChildSingle);
-                        //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
-                        //System.out.println("变异方式6结束");
-
-                    }
-
-                }
-            }
-
-            //如果没有选中头部元素
+            //如果右列和左列不属于同一个图(即左列位于右列的图前方)
             else
             {
-               // System.out.println("变异交换策略方式7,左右列队首没有位于同一个图,右列长度大于1,未选中右列头部" +
-                 //       "则直接对左右列元素进行交换即可");
+
+
+                //如果对应left的映射编码为-1(左集合内没有该图对应的节点),将该列置为Visited True,将left列编码设为对应
+                // System.out.println("map_left_row: "+map_left_row);
+                //System.out.println("belong_graph"+belong_graph_right);
+                //System.out.println("col_swap_left"+col_swap_left);
+                if(tempGenerationChildSingle.get(map_left_row).get(col_swap_left)==-1)
+                {
+                    //System.out.println("变异交换策略方式2,左右列队首没有位于同一个图,右列只有队首元素,左列无对应元素" +
+                    //        "则将右列元素置为true,右列元素来到左列,左列对应元素置为false");
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    int map_graph_index=col_swap_right-VertexPreNumber[belong_graph_right];
+                    tempGenerationChildSingle.get(map_left_row).set(col_swap_left,map_graph_index);
+                    VisitedNumberSet[populationIndex][col_swap_right]=true;
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    //System.out.println("变异方式2结束");
+
+                }
+                //如果对应left的映射编码不为-1(左集合内有该图对应的节点),
+                else
+                {
+                    //System.out.println("变异交换策略方式3,左右列队首没有位于同一个图,右列只有队首元素,左列有对应元素" +
+                    //"则将右列元素置为true,右列元素来到左列,左列对应元素置为false");
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    ////将左集合的该列置为Visited false,右集合的原列置为Visited True
+                    int map_graph_index_left=VertexPreNumber[belong_graph_right]+tempGenerationChildSingle.get(map_left_row).get(col_swap_left);
+                    int map_graph_index_right=col_swap_right-VertexPreNumber[belong_graph_right];
+                    tempGenerationChildSingle.get(map_left_row).set(col_swap_left,map_graph_index_right);
+                    VisitedNumberSet[populationIndex][col_swap_right]=true;
+                    VisitedNumberSet[populationIndex][map_graph_index_left]=false;
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    //System.out.println("变异方式3结束");
+
+                }
+            }
+
+
+            return;
+        }
+
+
+
+        //如果右边集合的大小|S|>1
+        //对右边的那列选出某一个有效的编码作为交换
+        //int belong_graph=belongtoWhichGraph(col_swap_right,VertexPreNumber);
+        int map_right_head_row=belong_graph_right-1;
+        //选出所有选中右列中有有效元素的row
+        List<Integer> valid_code_list=new ArrayList<>();
+        for(int valid_row=belong_graph_right;valid_row<GraphNumber-1;valid_row++)
+        {
+            if(tempGenerationChildSingle.get(valid_row).get(col_swap_right)!=-1)
+            {
+                valid_code_list.add(valid_row);
+            }
+        }
+        //该集合中最后有-1(即该列对应的图列首元素)
+        valid_code_list.add(-1);
+
+        //定义选择分裂的那一行的number
+        int choose_mutation_row_index=random.nextInt(valid_code_list.size());
+        int choose_mutation_row_number=valid_code_list.get(choose_mutation_row_index);
+        //如果选中了头部元素
+        if(choose_mutation_row_number==-1)
+        {
+
+            //如果左右列位于同一个图,则交换下方编码
+            if(belong_graph_left==belong_graph_right)
+            {
+                // System.out.println("变异交换策略方式4,左右列队首位于同一个图,右列长度大于1,选中右列头部" +
+                //"则将左右列元素互换即可");
+                // System.out.println(tempGenerationChildSingle);
+                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                for(int belong_graph_row_index=belong_graph_left;belong_graph_row_index<GraphNumber-1;belong_graph_row_index++)
+                {
+                    int swaptemp=tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_left);
+                    tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_left,tempGenerationChildSingle.get(belong_graph_row_index).get(col_swap_right));
+                    tempGenerationChildSingle.get(belong_graph_row_index).set(col_swap_right,swaptemp);
+                }
                 //System.out.println(tempGenerationChildSingle);
-                int swaptemp=tempGenerationChildSingle.get(choose_mutation_row_number).get(col_swap_left);
-                tempGenerationChildSingle.get(choose_mutation_row_number).set(col_swap_left,tempGenerationChildSingle.get(choose_mutation_row_number).get(col_swap_right));
-                tempGenerationChildSingle.get(choose_mutation_row_number).set(col_swap_right,swaptemp);
-                //System.out.println(tempGenerationChildSingle);
+                //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                //System.out.println("变异方式4结束");
+            }
+
+            //如果左右列不位于同一个图
+            else
+            {
+
+                //如果对应left的映射编码为-1
+                if(tempGenerationChildSingle.get(map_right_head_row).get(col_swap_left)==-1)
+                {
+                    //System.out.println("变异交换策略方式5,左右列队首没有位于同一个图,右列长度大于1,选中右列头部" +
+                    //"左列没有该图对应元素,则将右列元素移过来,右列其他元素移动到右列第一个元素对应的列");
+                    //将除头部以外的有效code交换到右半部分
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    //取出第一个元素,找到它对应的VisitedNumberset
+                    int choose_mutation_row_first=valid_code_list.get(0);
+                    int swap_col_after_right=VertexPreNumber[choose_mutation_row_first+1]+tempGenerationChildSingle.get(choose_mutation_row_first).get(col_swap_right);
+                    //将第一个元素置为-1
+                    tempGenerationChildSingle.get(choose_mutation_row_first).set(col_swap_right,-1);
+                    //将list里面的元素全部取出来与对应的swap_col进行交换
+                    for(int index=1;index<=valid_code_list.size()-2;index++)
+                    {
+                        int choose_mutation_row_second=valid_code_list.get(index);
+                        int choose_mutation_exchange_number=tempGenerationChildSingle.get(choose_mutation_row_second).get(col_swap_right);
+                        tempGenerationChildSingle.get(choose_mutation_row_second).set(swap_col_after_right,choose_mutation_exchange_number);
+                        //将原来列的值置为-1
+                        tempGenerationChildSingle.get(choose_mutation_row_second).set(col_swap_right,-1);
+                    }
+                    //将right列置为已访问,将right列第一个不为-1的数对应的列置为false未访问
+                    VisitedNumberSet[populationIndex][col_swap_right]=true;
+                    VisitedNumberSet[populationIndex][swap_col_after_right]=false;
+                    //进行交换
+                    tempGenerationChildSingle.get(map_right_head_row).set(col_swap_left,col_swap_right-VertexPreNumber[belong_graph_right]);
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    //System.out.println("变异方式5结束");
+                }
+                //如果对应left的映射编码不为-1
+                else
+                {
+                    //System.out.println("变异交换策略方式6,左右列队首没有位于同一个图,右列长度大于1,选中右列头部" +
+                    //"左列有该图对应元素,则将右列元素移过来,右列其他元素移动到左列该元素对应的列");
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    int map_left_col=VertexPreNumber[belong_graph_right]+tempGenerationChildSingle.get(belong_graph_right-1).get(col_swap_left);
+                    //如果两边都有有效编码,将右列的有效编码交换到对应的左列映射编码,然后将右列头部填入左列,修改冲突数组
+                    for(int row_index=belong_graph_right;row_index<GraphNumber-1;row_index++)
+                    {
+                        //int swaptemp=tempGenerationChildSingle.get(row_index).get(col_swap_left);
+                        tempGenerationChildSingle.get(row_index).set(map_left_col,tempGenerationChildSingle.get(row_index).get(col_swap_right));
+                        tempGenerationChildSingle.get(row_index).set(col_swap_right,-1);
+                        //tempGenerationChildSingle.get(row_index).set(col_swap_right,swaptemp);
+                    }
+                    //最后将右列的队首元素值填入左列对应行
+                    tempGenerationChildSingle.get(map_right_head_row).set(col_swap_left,col_swap_right-VertexPreNumber[belong_graph_right]);
+                    VisitedNumberSet[populationIndex][col_swap_right]=true;
+                    VisitedNumberSet[populationIndex][map_left_col]=false;
+                    //System.out.println(tempGenerationChildSingle);
+                    //System.out.println(Arrays.toString(VisitedNumberSet[populationIndex]));
+                    //System.out.println("变异方式6结束");
+
+                }
 
             }
+        }
+
+        //如果没有选中头部元素
+        else
+        {
+            // System.out.println("变异交换策略方式7,左右列队首没有位于同一个图,右列长度大于1,未选中右列头部" +
+            //       "则直接对左右列元素进行交换即可");
+            //System.out.println(tempGenerationChildSingle);
+            int swaptemp=tempGenerationChildSingle.get(choose_mutation_row_number).get(col_swap_left);
+            tempGenerationChildSingle.get(choose_mutation_row_number).set(col_swap_left,tempGenerationChildSingle.get(choose_mutation_row_number).get(col_swap_right));
+            tempGenerationChildSingle.get(choose_mutation_row_number).set(col_swap_right,swaptemp);
+            //System.out.println(tempGenerationChildSingle);
+
+        }
 
             /*
             int col_right_heigh_all=GraphNumber-1-belongtoWhichGraph(col_swap_right,VertexPreNumber);
             int col_right_height=random.nextInt(col_right_heigh_all);
             int swap_row=belongtoWhichGraph(col_swap_right,VertexPreNumber)+col_right_height;
             */
-            //细粒度交换,在swap_row 行对col_right和col_left列做交换(并没有判断是否交换的编码为-1)
+        //细粒度交换,在swap_row 行对col_right和col_left列做交换(并没有判断是否交换的编码为-1)
 
 
         return;
@@ -1289,66 +1289,6 @@ public class Main {
         return VertexNumberAfterFusion;
     }
 
-
-
-    //用广义熵作为适应度函数
-    public static int[] caculateFitnessEntropy(List<List<List<Integer>>> firstPopulation,int VertexAllNumber,int Graphset[][][],
-                                                      int VertexPreNumber[],boolean VisitedNumbersSet[][]) {
-        int fitness[] = new int[PopulationSize];
-        //融合后的方案图,用邻接矩阵的方式存储,每个矩阵
-        Set<Integer> GraphAfterFusion[][][] = new Set[PopulationSize][VertexAllNumber][VertexAllNumber];
-        int populationIndex, row, col, graphIndex, i, j, x, y;
-        for (populationIndex = 0; populationIndex < PopulationSize; populationIndex++) {
-            for (graphIndex = 0; graphIndex < GraphNumber; graphIndex++) {
-                for (i = 0; i < Graphset[graphIndex].length; i++) {
-                    for (j = i; j < Graphset[graphIndex].length; j++) {
-                        //如果图集合原图有边,对于出边和入边点i,j分别找到在融合方案中对应的index
-                        if (Graphset[graphIndex][i][j] == 1) {
-                            int i_index = 0;
-                            int j_index = 0;
-                            if (graphIndex == 0) {
-                                GraphAfterFusion[populationIndex][i][j].add(0);
-                                GraphAfterFusion[populationIndex][j][i].add(0);
-                                i_index = i;
-                                j_index = j;
-
-                            } else if (graphIndex >= 1) {
-
-                                //对于(graphindex-1)list,如果存在对应关系
-                                if (firstPopulation.get(populationIndex).get(graphIndex - 1).contains(i)) {
-                                    i_index = firstPopulation.get(populationIndex).get(graphIndex - 1).indexOf(i);
-
-                                }
-                                //对于graph-1 list,没有对应关系,则该节点为一列的开头节点
-                                else {
-                                    i_index = VertexPreNumber[graphIndex] + i;
-                                }
-
-                                //对于j同理
-                                if (firstPopulation.get(populationIndex).get(graphIndex - 1).contains(j)) {
-                                    j_index = firstPopulation.get(populationIndex).get(graphIndex - 1).indexOf(j);
-
-                                }
-                                //对于graph-1 list,没有对应关系,则该节点为一列的开头节点
-                                else {
-                                    j_index = VertexPreNumber[graphIndex] + j;
-                                }
-                                GraphAfterFusion[populationIndex][i_index][j_index].add(graphIndex);
-                                GraphAfterFusion[populationIndex][j_index][i_index].add(graphIndex);
-
-                            }
-                            //System.out.println("i_index is: "+i_index +" "+"j_index is"+j_index+" populationIndexis :"+populationIndex);
-                        }
-                    }
-                }
-            }
-
-        }
-        return fitness;
-        //得到元素为集合的邻接矩阵,对每一个融合节点计算熵,先计算每个节点的出边的集合构成,即除当前点外其他点与该点的边连接情况
-
-    }
-
     public static int[] CaculateEdgeNumberAfterFusion(List<List<List<Integer>>> firstPopulation,int VertexAllNumber,int Graphset[][][],
                                                       int VertexPreNumber[],boolean VisitedNumbersSet[][])
     {
@@ -1427,8 +1367,6 @@ public class Main {
     }
 
 
-
-
     //对于种群的适应度,采用|V|*|E|作为计算方式,需要种群编码,原图集合作为输入
     //fitness的计算取决与VistedNumberSet是否正确
     public static int[] CaculateFitness(List<List<List<Integer>>> firstPopulation,int VertexAllNumber,int Graphset[][][],
@@ -1445,11 +1383,11 @@ public class Main {
         VertexNumberAfterFusion=CaculateVertexNumberAfterFusion(firstPopulation,VertexAllNumber,
                 Graphset,VertexPreNumber,VisitedNumbersSet);
         EdgeNumberAfterFusion=CaculateEdgeNumberAfterFusion(firstPopulation,VertexAllNumber,Graphset,
-                         VertexPreNumber,VisitedNumbersSet);
+                VertexPreNumber,VisitedNumbersSet);
         for(populationIndex=0;populationIndex<PopulationSize;populationIndex++)
         {
             fitness[populationIndex] = EdgeNumberAfterFusion[populationIndex];
-                    //* VertexNumberAfterFusion[populationIndex];
+            //* VertexNumberAfterFusion[populationIndex];
         }
 
         return fitness;
